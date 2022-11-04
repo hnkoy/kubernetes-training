@@ -179,11 +179,13 @@ metadata:
 spec:
 ** declare a replicas with 1 pod
   replicas: 1
+**
+declare selector
   selector:
-** match label
     matchLabels:
       app: wordpress
       tier: mysql
+ **
  ** recreate strategy in update case
  define
   strategy:
@@ -235,4 +237,96 @@ volumes:
    hostPath:
      path: /data/mysql
 ```
-  
+
+### WordPress deployment
+
+```
+apiVersion: apps/v1
+** specify k8s object 
+kind: Deployment
+**
+metadata:
+  name: wordpress
+** Labels can be used to organize and to select subsets of objects.
+  labels:
+     app: wordpress
+**
+** set the deployment into our namespace created
+  namespace: wordpress
+**
+spec:
+** declare a replicas with 1 pod
+  replicas: 1
+**
+** declare selector
+  selector:
+    matchLabels:
+       app: wordpress
+       tier: frontend
+**
+ ** recreate strategy in update case
+  strategy:
+    type: Recreate
+**
+** template pod
+  template:
+    metadata:
+       labels:
+         app: wordpress
+         tier: frontend
+** container specifications 
+    spec:
+** specify the image and container name
+      containers:
+      - image: wordpress:latest
+        name: wordpress
+**
+** specify environment variables and get some values into our secret
+        env:
+        - name: WORDPRESS_DB_USER
+          value: toto
+        - name: WORDPRESS_DB_NAME
+          value: wordpress
+        - name: WORDPRESS_DB_HOST
+          value: wp-mysql
+        - name: WORDPRESS_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+               name: app-wordpress-secret
+               key: wordpress_db_password
+***
+** specify the container listen port
+    ports:
+    - containerPort: 80
+      name: wordpress
+ **
+ ** mount a volume
+   volumeMounts:
+   - name: wp-persistent-storage
+     mountPath: /var/www/html
+***
+** declare the volume used 
+  volumes:
+  - name: wp-persistent-storage
+    hostPath:
+    path: /data/wordpress
+```
+
+make sure you are in your manifest directory and run this command
+ ```
+kubectl apply -f mysql-deployment.yml wordpress-deployment.yml
+  ```
+
+ run this command to show the deployments don't forget  the option -n  to select only the deployments in the specific namespace
+  ```
+  kubectl get deploy -n wordpress
+ ```
+run this command to show the replicaSet created
+  ```
+  kubectl get rs -n wordpress
+ ```
+
+and run this command to show the Pod created
+  ```
+  kubectl get pod -n wordpress
+ ```
