@@ -15,7 +15,7 @@ In this project, we are going to deploy WordPress cms and a MySQL server using K
 
 
 
-![enter image description here](https://raw.githubusercontent.com/hnkoy/kubernetes-training/master/k8s_infra.jpg)
+![enter image description here](https://raw.githubusercontent.com/hnkoy/kubernetes-training/master/mini_infra.jpg)
 
 # NameSpace
 
